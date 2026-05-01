@@ -46,6 +46,5 @@ export function useItems({ parentId, page, limit, sort, search }: Params): Resul
   }, [parentId, page, limit, sort, search, refreshKey]);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
-
   return { items, loading, error, refresh };
 }

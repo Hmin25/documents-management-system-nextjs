@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Image from 'next/image';
 import type { Item, SortEntry } from '@/types/item';
 import ActionMenu from './ActionMenu';
 
@@ -126,17 +127,29 @@ export default function Table({
                     {item.type === 'folder' ? (
                       <button
                         onClick={() => onFolderClick(item)}
-                        className="flex items-center gap-2 text-blue-600 hover:underline cursor-pointer"
+                        className="flex items-center gap-2 text-blue-600 font-semibold hover:underline cursor-pointer"
                       >
-                        <span>📁</span>
+                        <Image
+                          src="/folder-line.svg"
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="w-4 h-4"
+                        />
                         <span>{item.name}</span>
                       </button>
                     ) : (
                       <button
                         onClick={() => onFileClick(item)}
-                        className="flex items-center gap-2 text-gray-800 hover:text-blue-600 hover:underline cursor-pointer"
+                        className="flex items-center gap-2 text-gray-800 font-semibold hover:text-blue-600 hover:underline cursor-pointer"
                       >
-                        <span>📄</span>
+                        <Image
+                          src="/file-line.svg"
+                          alt=""
+                          width={16}
+                          height={16}
+                          className="w-4 h-4"
+                        />
                         <span>{item.name}</span>
                       </button>
                     )}

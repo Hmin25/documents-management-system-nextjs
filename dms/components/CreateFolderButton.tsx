@@ -64,7 +64,7 @@ export default function CreateFolderButton({ onCreate, disabled }: Props) {
       {open && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-80 shadow-xl">
-            <h2 className="text-base font-semibold mb-4">Create New Folder</h2>
+            <h2 className="text-base font-semibold mb-4 text-[#0B2447]">Create New Folder</h2>
 
             <label className="text-xs text-gray-600 mb-1 block">
               Name <span className="text-red-500">*</span>
@@ -77,7 +77,7 @@ export default function CreateFolderButton({ onCreate, disabled }: Props) {
               placeholder="Folder name"
               maxLength={255}
               autoFocus
-              className={`w-full border rounded px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full border text-[#0B2447] rounded px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 error ? 'border-red-400' : 'border-gray-300'
               }`}
             />

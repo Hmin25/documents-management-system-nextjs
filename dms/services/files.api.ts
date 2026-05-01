@@ -1,7 +1,8 @@
 import { API_BASE, request } from './api';
+import { endpoints } from './endpoints';
 import type { Item } from '@/types/item';
 
-export function upload(
+function upload(
   files: File[],
   parentId: number | null,
   createdBy: string
@@ -15,7 +16,7 @@ export function upload(
   if (parentId !== null) form.append('parentId', String(parentId));
   form.append('createdBy', createdBy);
 
-  return request<Item[]>('/files/upload', {
+  return request<Item[]>(endpoints.files.upload, {
     method: 'POST',
     body: form,
   });
@@ -24,11 +25,19 @@ export function upload(
 function replace(id: number, file: File): Promise<Item> {
   const form = new FormData();
   form.append('file', file);
-  return request<Item>(`/files/${id}/replace`, { method: 'PUT', body: form });
+
+  return request<Item>(endpoints.files.replace(id), {
+    method: 'PUT',
+    body: form,
+  });
 }
 
 function previewUrl(id: number): string {
-  return `${API_BASE}/files/${id}/preview`;
+  return `${API_BASE}${endpoints.files.preview(id)}`;
 }
 
-export const filesApi = { upload, replace, previewUrl };
+export const filesApi = {
+  upload,
+  replace,
+  previewUrl,
+};

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import type { Item } from '@/types/item';
 
 type Props = {
@@ -40,7 +41,14 @@ export default function ActionMenu({ item, onEdit }: Props) {
             }}
             className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
           >
-            ✏️ Edit
+            <Image
+              src="/edit-line.svg"
+              alt=""
+              width={16}
+              height={16}
+              className="w-4 h-4"
+            />
+            <span>Edit</span>
           </button>
         </div>
       )}

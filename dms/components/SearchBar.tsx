@@ -32,7 +32,7 @@ export default function SearchBar({ onSearch }: Props) {
       value={value}
       onChange={handleChange}
       placeholder="Search files and folders..."
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+      className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B2447] w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
     />
   );
 }

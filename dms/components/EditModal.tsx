@@ -53,7 +53,7 @@ export default function EditModal({ item, onSave, onClose }: Props) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-80 shadow-xl">
-        <h2 className="text-base font-semibold mb-4">
+        <h2 className="text-base font-semibold mb-4 text-[#0B2447]">
           Edit {item.type === 'folder' ? 'Folder' : 'File'}
         </h2>
 
@@ -70,7 +70,7 @@ export default function EditModal({ item, onSave, onClose }: Props) {
           disabled={isReplacing}
           autoFocus={!isReplacing}
           placeholder="Item name"
-          className={`w-full border rounded px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+          className={`w-full border text-[#0B2447] rounded px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
             isReplacing
               ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200'
               : nameError
