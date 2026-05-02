@@ -5,13 +5,7 @@ import Image from 'next/image';
 import type { Item, SortEntry } from '@/types/item';
 import ActionMenu from './ActionMenu';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select } from 'flowbite-react';
 
 type Props = {
   items: Item[];
@@ -182,22 +176,18 @@ export default function Table({
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <span>Rows per page:</span>
           <Select
+            sizing="md"
             value={String(limit)}
-            onValueChange={v => {
-              onLimitChange(Number(v));
+            onChange={e => {
+              onLimitChange(Number(e.target.value));
               onPageChange(1);
             }}
           >
-            <SelectTrigger size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 15, 20].map(n => (
-                <SelectItem key={n} value={String(n)}>
-                  {n}
-                </SelectItem>
-              ))}
-            </SelectContent>
+            {[10, 15, 20].map(n => (
+              <option key={n} value={String(n)}>
+                {n}
+              </option>
+            ))}
           </Select>
         </div>
         <div className="flex items-center gap-2">

@@ -30,10 +30,10 @@ export default function FilePreviewModal({ item, onClose }: Props) {
   }, [item.id, item.name]);
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open size="4xl" onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0 sm:max-w-4xl"
+        className="flex flex-col p-0 gap-0 h-[85vh]"
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
