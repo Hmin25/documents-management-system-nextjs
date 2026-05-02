@@ -4,6 +4,14 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import type { Item, SortEntry } from '@/types/item';
 import ActionMenu from './ActionMenu';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type Props = {
   items: Item[];
@@ -173,37 +181,43 @@ export default function Table({
       <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <span>Rows per page:</span>
-          <select
-            value={limit}
-            onChange={e => {
-              onLimitChange(Number(e.target.value));
+          <Select
+            value={String(limit)}
+            onValueChange={v => {
+              onLimitChange(Number(v));
               onPageChange(1);
             }}
-            className="border border-gray-300 rounded px-2 py-1 text-sm"
           >
-            {[10, 15, 20].map(n => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 15, 20].map(n => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="px-3 py-1 text-sm text-gray-700 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-100 cursor-pointer disabled:cursor-not-allowed"
           >
             ← Prev
-          </button>
+          </Button>
           <span className="text-sm text-gray-700 px-1">Page {page}</span>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onPageChange(page + 1)}
             disabled={!hasNextPage}
-            className="px-3 py-1 text-sm text-gray-700 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-100 cursor-pointer disabled:cursor-not-allowed"
           >
             Next →
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { filesApi } from '@/services/files.api';
 import type { Item } from '@/types/item';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type Props = {
   item: Item;
@@ -18,14 +19,6 @@ export default function FilePreviewModal({ item, onClose }: Props) {
   const [textError, setTextError] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  useEffect(() => {
     if (!isTxt(item.name)) return;
     fetch(filesApi.previewUrl(item.id))
       .then(res => {
@@ -37,13 +30,10 @@ export default function FilePreviewModal({ item, onClose }: Props) {
   }, [item.id, item.name]);
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-lg shadow-2xl flex flex-col w-full max-w-4xl h-[90vh]"
-        onClick={e => e.stopPropagation()}
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0 sm:max-w-4xl"
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -75,10 +65,10 @@ export default function FilePreviewModal({ item, onClose }: Props) {
           <iframe
             src={filesApi.previewUrl(item.id)}
             title={item.name}
-            className="flex-1 w-full rounded-b-lg"
+            className="flex-1 w-full rounded-b-xl"
           />
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

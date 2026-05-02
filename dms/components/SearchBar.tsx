@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 type Props = {
   onSearch: (value: string) => void;
@@ -27,12 +28,12 @@ export default function SearchBar({ onSearch }: Props) {
   }, []);
 
   return (
-    <input
+    <Input
       type="text"
       value={value}
       onChange={handleChange}
       placeholder="Search files and folders..."
-      className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#0B2447] w-72 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+      className="w-72 text-[#0B2447]"
     />
   );
 }

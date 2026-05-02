@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
-import { Montserrat, Geist_Mono } from 'next/font/google';
+import { Montserrat, Geist_Mono, Geist } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const montserratSans = Montserrat({
   variable: '--font-montserrat-sans',
@@ -26,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montserratSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", montserratSans.variable, geistMono.variable, "font-sans", geist.variable)}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

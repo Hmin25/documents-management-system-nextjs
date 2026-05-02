@@ -3,6 +3,15 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { itemNameSchema } from '@/lib/schemas';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 type Props = {
   onCreate: (name: string) => Promise<void>;
@@ -33,9 +42,7 @@ export default function CreateFolderButton({ onCreate, disabled }: Props) {
       const trimmed = name.trim();
       await onCreate(trimmed);
       toast.success(`Folder "${trimmed}" created.`);
-      setName('');
-      setError(null);
-      setOpen(false);
+      handleClose();
     } catch {
       toast.error('Failed to create folder. Please try again.');
     } finally {
@@ -61,15 +68,17 @@ export default function CreateFolderButton({ onCreate, disabled }: Props) {
         + Add new folder
       </button>
 
-      {open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-80 shadow-xl">
-            <h2 className="text-base font-semibold mb-4 text-[#0B2447]">Create New Folder</h2>
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-[#0B2447]">Create New Folder</DialogTitle>
+          </DialogHeader>
 
-            <label className="text-xs text-gray-600 mb-1 block">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-gray-600">
               Name <span className="text-red-500">*</span>
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={e => handleChange(e.target.value)}
@@ -77,31 +86,26 @@ export default function CreateFolderButton({ onCreate, disabled }: Props) {
               placeholder="Folder name"
               maxLength={255}
               autoFocus
-              className={`w-full border text-[#0B2447] rounded px-3 py-2 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                error ? 'border-red-400' : 'border-gray-300'
-              }`}
+              aria-invalid={error ? true : undefined}
+              className="text-[#0B2447]"
             />
-            {error && <p className="text-xs text-red-500 mb-3">{error}</p>}
-            {!error && <div className="mb-3" />}
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isInvalid || submitting}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Creating...' : 'Create'}
-              </button>
-            </div>
+            {error && <p className="text-xs text-red-500">{error}</p>}
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={handleClose} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isInvalid || submitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {submitting ? 'Creating...' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
