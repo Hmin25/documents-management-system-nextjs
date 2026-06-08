@@ -1,13 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import type { BreadcrumbEntry } from '@/types/item';
 
 type Props = {
   breadcrumbs: BreadcrumbEntry[];
-  onNavigate: (id: number | null) => void;
+  getHref: (index: number) => string;
 };
 
-export default function Breadcrumbs({ breadcrumbs, onNavigate }: Props) {
+export default function Breadcrumbs({ breadcrumbs, getHref }: Props) {
   return (
     <nav className="flex items-center gap-1 text-sm text-gray-600">
       {breadcrumbs.map((crumb, index) => {
@@ -24,14 +25,14 @@ export default function Breadcrumbs({ breadcrumbs, onNavigate }: Props) {
                 {crumb.name}
               </span>
             ) : (
-              <button
-                onClick={() => onNavigate(crumb.id)}
-                className={`hover:text-blue-600 hover:underline cursor-pointer ${
+              <Link
+                href={getHref(index)}
+                className={`hover:text-blue-600 hover:underline ${
                   crumb.id === null ? 'text-lg' : ''
                 }`}
               >
                 {crumb.name}
-              </button>
+              </Link>
             )}
           </span>
         );

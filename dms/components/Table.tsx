@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Item, SortEntry } from '@/types/item';
 import ActionMenu from './ActionMenu';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ type Props = {
   error: string | null;
   sortEntries: SortEntry[];
   onSort: (field: string) => void;
-  onFolderClick: (item: Item) => void;
+  getFolderHref: (item: Item) => string;
   onFileClick: (item: Item) => void;
   onEdit: (item: Item) => void;
   page: number;
@@ -50,7 +51,7 @@ export default function Table({
   error,
   sortEntries,
   onSort,
-  onFolderClick,
+  getFolderHref,
   onFileClick,
   onEdit,
   page,
@@ -127,9 +128,9 @@ export default function Table({
                 >
                   <td className="px-4 py-3">
                     {item.type === 'folder' ? (
-                      <button
-                        onClick={() => onFolderClick(item)}
-                        className="flex items-center gap-2 text-blue-600 font-semibold hover:underline cursor-pointer"
+                      <Link
+                        href={getFolderHref(item)}
+                        className="flex items-center gap-2 text-blue-600 font-semibold hover:underline"
                       >
                         <Image
                           src="/folder-line.svg"
@@ -139,7 +140,7 @@ export default function Table({
                           className="w-4 h-4"
                         />
                         <span>{item.name}</span>
-                      </button>
+                      </Link>
                     ) : (
                       <button
                         onClick={() => onFileClick(item)}

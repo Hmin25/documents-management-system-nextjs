@@ -8,6 +8,7 @@ type Params = {
   limit: number;
   sort?: string;
   search: string;
+  skip?: boolean;
 };
 
 type Result = {
@@ -17,13 +18,15 @@ type Result = {
   refresh: () => void;
 };
 
-export function useItems({ parentId, page, limit, sort, search }: Params): Result {
+export function useItems({ parentId, page, limit, sort, search, skip = false }: Params): Result {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    if (skip) return;
+
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
@@ -43,7 +46,7 @@ export function useItems({ parentId, page, limit, sort, search }: Params): Resul
     return () => {
       cancelled = true;
     };
-  }, [parentId, page, limit, sort, search, refreshKey]);
+  }, [parentId, page, limit, sort, search, refreshKey, skip]);
 
   const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
   return { items, loading, error, refresh };

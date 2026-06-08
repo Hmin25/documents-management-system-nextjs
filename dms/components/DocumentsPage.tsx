@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/preserve-manual-memoization */
 'use client';
 
 import { useCallback, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import SearchBar from '@/components/SearchBar';
 import UploadButton from '@/components/UploadButton';
@@ -8,27 +10,33 @@ import CreateFolderButton from '@/components/CreateFolderButton';
 import Table from '@/components/Table';
 import EditModal from '@/components/EditModal';
 import FilePreviewModal from '@/components/FilePreviewModal';
+import { useFolderPath } from '@/hooks/useFolderPath';
 import { useItems } from '@/hooks/useItems';
+import {
+  buildDocumentsHref,
+  parseDocumentsQuery,
+  sortToString,
+  toggleSort,
+  type DocumentsQuery,
+} from '@/lib/documentsUrl';
 import { itemsApi } from '@/services/items.api';
 import { filesApi } from '@/services/files.api';
-import type { BreadcrumbEntry, Item, SortEntry } from '@/types/item';
+import type { Item } from '@/types/item';
 
 const CREATED_BY = 'system';
 
-function sortToString(entries: SortEntry[]): string | undefined {
-  if (entries.length === 0) return undefined;
-  return entries.map(e => `${e.field}:${e.order}`).join(',');
-}
+type Props = {
+  folderPath: string[];
+};
 
-export default function Home() {
-  const [parentId, setParentId] = useState<number | null>(null);
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbEntry[]>([
-    { id: null, name: 'Documents' },
-  ]);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [sortEntries, setSortEntries] = useState<SortEntry[]>([]);
-  const [search, setSearch] = useState('');
+export default function DocumentsPage({ folderPath }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const query = parseDocumentsQuery(searchParams);
+  const { page, limit, sortEntries, search } = query;
+
+  const { breadcrumbs, parentId, loading: pathLoading, invalid } = useFolderPath(folderPath);
+
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
 
@@ -38,37 +46,39 @@ export default function Home() {
     limit,
     sort: sortToString(sortEntries),
     search,
+    skip: pathLoading || invalid,
   });
 
-  const handleFolderClick = useCallback((item: Item) => {
-    setParentId(item.id);
-    setBreadcrumbs(prev => [...prev, { id: item.id, name: item.name }]);
-    setPage(1);
-  }, []);
+  const navigate = useCallback(
+    (path: string[], nextQuery: Partial<DocumentsQuery>) => {
+      router.push(buildDocumentsHref(path, { ...query, ...nextQuery }));
+    },
+    [router, query],
+  );
 
-  const handleNavigate = useCallback((id: number | null) => {
-    setParentId(id);
-    setBreadcrumbs(prev => {
-      const idx = prev.findIndex(b => b.id === id);
-      return idx >= 0 ? prev.slice(0, idx + 1) : prev;
-    });
-    setPage(1);
-  }, []);
+  const getFolderHref = useCallback(
+    (item: Item) => buildDocumentsHref([...folderPath, item.name], { ...query, page: 1 }),
+    [folderPath, query],
+  );
 
-  const handleSort = useCallback((field: string) => {
-    setSortEntries(prev => {
-      const existing = prev.find(s => s.field === field);
-      if (!existing) return [...prev, { field, order: 'asc' }];
-      if (existing.order === 'asc') return prev.map(s => s.field === field ? { ...s, order: 'desc' } : s);
-      return prev.filter(s => s.field !== field);
-    });
-    setPage(1);
-  }, []);
+  const handleBreadcrumbHref = useCallback(
+    (index: number) => buildDocumentsHref(folderPath.slice(0, index), { ...query, page: 1 }),
+    [folderPath, query],
+  );
 
-  const handleSearch = useCallback((value: string) => {
-    setSearch(value);
-    setPage(1);
-  }, []);
+  const handleSort = useCallback(
+    (field: string) => {
+      navigate(folderPath, { sortEntries: toggleSort(sortEntries, field), page: 1 });
+    },
+    [folderPath, sortEntries, navigate],
+  );
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      navigate(folderPath, { search: value, page: 1 });
+    },
+    [folderPath, navigate],
+  );
 
   const handleUpload = useCallback(
     async (files: File[]) => {
@@ -100,34 +110,37 @@ export default function Home() {
     [editingItem, refresh],
   );
 
+  const tableLoading = pathLoading || loading;
+  const tableError = invalid ? 'Folder not found.' : error;
+
   return (
     <div className="min-h-screen bg-gray-100 px-6 pb-6 pt-10">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <Breadcrumbs breadcrumbs={breadcrumbs} onNavigate={handleNavigate} />
+          <Breadcrumbs breadcrumbs={breadcrumbs} getHref={handleBreadcrumbHref} />
           <div className="flex items-start gap-2">
-            <UploadButton onUpload={handleUpload} disabled={!!search} />
-            <CreateFolderButton onCreate={handleCreateFolder} disabled={!!search} />
+            <UploadButton onUpload={handleUpload} disabled={!!search || invalid} />
+            <CreateFolderButton onCreate={handleCreateFolder} disabled={!!search || invalid} />
           </div>
         </div>
 
         <div>
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar value={search} onSearch={handleSearch} />
         </div>
 
         <Table
           items={items}
-          loading={loading}
-          error={error}
+          loading={tableLoading}
+          error={tableError}
           sortEntries={sortEntries}
           onSort={handleSort}
-          onFolderClick={handleFolderClick}
+          getFolderHref={getFolderHref}
           onFileClick={setPreviewItem}
           onEdit={setEditingItem}
           page={page}
           limit={limit}
-          onPageChange={setPage}
-          onLimitChange={setLimit}
+          onPageChange={nextPage => navigate(folderPath, { page: nextPage })}
+          onLimitChange={nextLimit => navigate(folderPath, { limit: nextLimit, page: 1 })}
         />
 
         {previewItem && (
