@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/preserve-manual-memoization */
 'use client';
 
-import { useCallback, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import SearchBar from '@/components/SearchBar';
 import UploadButton from '@/components/UploadButton';
@@ -10,15 +8,10 @@ import CreateFolderButton from '@/components/CreateFolderButton';
 import Table from '@/components/Table';
 import EditModal from '@/components/EditModal';
 import FilePreviewModal from '@/components/FilePreviewModal';
+import { useDocumentsNavigation } from '@/hooks/useDocumentsNavigation';
 import { useFolderPath } from '@/hooks/useFolderPath';
 import { useItems } from '@/hooks/useItems';
-import {
-  buildDocumentsHref,
-  parseDocumentsQuery,
-  sortToString,
-  toggleSort,
-  type DocumentsQuery,
-} from '@/lib/documentsUrl';
+import { sortToString } from '@/lib/documentsUrl';
 import { itemsApi } from '@/services/items.api';
 import { filesApi } from '@/services/files.api';
 import type { Item } from '@/types/item';
@@ -30,9 +23,8 @@ type Props = {
 };
 
 export default function DocumentsPage({ folderPath }: Props) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const query = parseDocumentsQuery(searchParams);
+  const { query, getFolderHref, getBreadcrumbHref, setPage, setLimit, setSearch, setSort } =
+    useDocumentsNavigation(folderPath);
   const { page, limit, sortEntries, search } = query;
 
   const { breadcrumbs, parentId, loading: pathLoading, invalid } = useFolderPath(folderPath);
@@ -49,66 +41,26 @@ export default function DocumentsPage({ folderPath }: Props) {
     skip: pathLoading || invalid,
   });
 
-  const navigate = useCallback(
-    (path: string[], nextQuery: Partial<DocumentsQuery>) => {
-      router.push(buildDocumentsHref(path, { ...query, ...nextQuery }));
-    },
-    [router, query],
-  );
+  async function handleUpload(files: File[]) {
+    await filesApi.upload(files, parentId, CREATED_BY);
+    refresh();
+  }
 
-  const getFolderHref = useCallback(
-    (item: Item) => buildDocumentsHref([...folderPath, item.name], { ...query, page: 1 }),
-    [folderPath, query],
-  );
+  async function handleCreateFolder(name: string) {
+    await itemsApi.createFolder(name, parentId, CREATED_BY);
+    refresh();
+  }
 
-  const handleBreadcrumbHref = useCallback(
-    (index: number) => buildDocumentsHref(folderPath.slice(0, index), { ...query, page: 1 }),
-    [folderPath, query],
-  );
-
-  const handleSort = useCallback(
-    (field: string) => {
-      navigate(folderPath, { sortEntries: toggleSort(sortEntries, field), page: 1 });
-    },
-    [folderPath, sortEntries, navigate],
-  );
-
-  const handleSearch = useCallback(
-    (value: string) => {
-      navigate(folderPath, { search: value, page: 1 });
-    },
-    [folderPath, navigate],
-  );
-
-  const handleUpload = useCallback(
-    async (files: File[]) => {
-      await filesApi.upload(files, parentId, CREATED_BY);
-      refresh();
-    },
-    [parentId, refresh],
-  );
-
-  const handleCreateFolder = useCallback(
-    async (name: string) => {
-      await itemsApi.createFolder(name, parentId, CREATED_BY);
-      refresh();
-    },
-    [parentId, refresh],
-  );
-
-  const handleEditSave = useCallback(
-    async (name: string, file?: File) => {
-      if (!editingItem) return;
-      if (file) {
-        await filesApi.replace(editingItem.id, file);
-      } else {
-        await itemsApi.rename(editingItem.id, name);
-      }
-      setEditingItem(null);
-      refresh();
-    },
-    [editingItem, refresh],
-  );
+  async function handleEditSave(name: string, file?: File) {
+    if (!editingItem) return;
+    if (file) {
+      await filesApi.replace(editingItem.id, file);
+    } else {
+      await itemsApi.rename(editingItem.id, name);
+    }
+    setEditingItem(null);
+    refresh();
+  }
 
   const tableLoading = pathLoading || loading;
   const tableError = invalid ? 'Folder not found.' : error;
@@ -117,7 +69,7 @@ export default function DocumentsPage({ folderPath }: Props) {
     <div className="min-h-screen bg-gray-100 px-6 pb-6 pt-10">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <Breadcrumbs breadcrumbs={breadcrumbs} getHref={handleBreadcrumbHref} />
+          <Breadcrumbs breadcrumbs={breadcrumbs} getHref={getBreadcrumbHref} />
           <div className="flex items-start gap-2">
             <UploadButton onUpload={handleUpload} disabled={!!search || invalid} />
             <CreateFolderButton onCreate={handleCreateFolder} disabled={!!search || invalid} />
@@ -125,7 +77,7 @@ export default function DocumentsPage({ folderPath }: Props) {
         </div>
 
         <div>
-          <SearchBar value={search} onSearch={handleSearch} />
+          <SearchBar value={search} onSearch={setSearch} />
         </div>
 
         <Table
@@ -133,14 +85,14 @@ export default function DocumentsPage({ folderPath }: Props) {
           loading={tableLoading}
           error={tableError}
           sortEntries={sortEntries}
-          onSort={handleSort}
+          onSort={setSort}
           getFolderHref={getFolderHref}
           onFileClick={setPreviewItem}
           onEdit={setEditingItem}
           page={page}
           limit={limit}
-          onPageChange={nextPage => navigate(folderPath, { page: nextPage })}
-          onLimitChange={nextLimit => navigate(folderPath, { limit: nextLimit, page: 1 })}
+          onPageChange={setPage}
+          onLimitChange={setLimit}
         />
 
         {previewItem && (

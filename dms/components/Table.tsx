@@ -179,10 +179,7 @@ export default function Table({
           <Select
             sizing="md"
             value={String(limit)}
-            onChange={e => {
-              onLimitChange(Number(e.target.value));
-              onPageChange(1);
-            }}
+            onChange={e => onLimitChange(Number(e.target.value))}
           >
             {[10, 15, 20].map(n => (
               <option key={n} value={String(n)}>

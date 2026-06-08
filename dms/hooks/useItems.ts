@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { itemsApi } from '@/services/items.api';
 import type { Item } from '@/types/item';
 
@@ -48,6 +48,9 @@ export function useItems({ parentId, page, limit, sort, search, skip = false }: 
     };
   }, [parentId, page, limit, sort, search, refreshKey, skip]);
 
-  const refresh = useCallback(() => setRefreshKey(k => k + 1), []);
+  function refresh() {
+    setRefreshKey(k => k + 1);
+  }
+
   return { items, loading, error, refresh };
 }
